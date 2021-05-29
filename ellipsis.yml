@@ -1,0 +1,25 @@
+values:
+  dotfile_root: "~/projects/dotfiles"
+
+hosts:
+  my-macbook:
+    tasks:
+      - link_config
+      - name: "Install homebrew"
+        exec: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    links:
+      - from: "{{dotfile_root}}/config"
+        to: ~/.config
+
+# these are global tasks that are only here to be referenced in the tasks heading
+tasks:
+  install_hammerspoon:
+    name: "Installs hammerspoon"
+    exec: |
+      brew install hammerspoon
+      mkdir ~/.hammerspoon
+
+# these are "global" links and will be run every time for every host
+links:
+  - from: "~/projects/dotfiles/config"
+    to: "~/.config"

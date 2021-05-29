@@ -1,0 +1,19 @@
+[package]
+name = "ellipsis"
+version = "0.1.0"
+authors = ["Ryan Faulhaber <ryf@sent.as>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+path = "src/lib.rs"
+
+[dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.8"
+clap = "3.0.0-beta.2"
+anyhow = "1.0"
+thiserror = "1.0"
+walkdir = "2.3.2"

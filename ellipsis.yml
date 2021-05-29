@@ -1,4 +1,4 @@
-values:
+vars:
   dotfile_root: "~/projects/dotfiles"
 
 hosts:

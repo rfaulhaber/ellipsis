@@ -3,13 +3,14 @@ use std::collections::HashMap;
 
 #[derive(Deserialize, Debug)]
 pub struct Config {
-    pub vars: Vec<String>,
+    pub vars: HashMap<String, String>,
     pub hosts: HashMap<String, ConfigHost>,
     pub tasks: HashMap<String, LiteralTaskDefinition>,
     pub links: Vec<LinkDefinition>,
 }
 
 #[derive(Deserialize, Debug)]
+#[serde(untagged)]
 pub enum TaskDefinition {
     Ref(String),
     Literal(LiteralTaskDefinition),

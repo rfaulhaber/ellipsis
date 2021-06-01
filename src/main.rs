@@ -5,7 +5,7 @@ use std::path::Path;
 fn main() {
     let opts = Opts::parse();
 
-    let config = read_config_file(opts.config_path.clone());
+    let config = read_config_file(opts.config.clone());
 
     println!("opts {:?}", config);
 }

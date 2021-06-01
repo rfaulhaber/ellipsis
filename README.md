@@ -28,18 +28,19 @@ hosts:
     my-macbook:
         tasks:
             # this references the task under the "tasks" heading
-            - link_config
-            - name: Install homebrew 
+            - install_hammerspoon
+            - name: install_homebrew # names are optional but required if you want to run with "exec"
               exec: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         links:
             - from: "{{dotfile_root}}/config"
               to: ~/.config
+              # names are optional but required if you want to run specifically
+              name: config 
         
 
 # these are global tasks that are only here to be referenced in the tasks heading
 tasks:
     install_hammerspoon:
-        name: "Installs hammerspoon"
         exec: |
             brew install hammerspoon
             mkdir ~/.hammerspoon
@@ -52,10 +53,37 @@ links:
 
 ### Install
 
-`install` runs all of the tasks under each `tasks` heading for a host.
+`install` runs both the tasks and links under a host.
 
 ``` sh
 ellipsis install
+```
+
+### Link
+Creates symlinks for all `link` entries.
+
+``` sh
+ellipsis link 
+
+```
+
+Optionally you can run partial links if your links are named.
+
+``` sh
+ellipsis link config
+```
+
+The `--hard` flag will hard link your files instead, and the `--copy` flag will copy your files rather than link them.
+
+``` sh
+ellipsis link --hard
+```
+
+### Exec
+Executes particular tasks for a host.
+
+``` sh
+ellipsis exec install_hammerspoon
 ```
 
 ### Revert

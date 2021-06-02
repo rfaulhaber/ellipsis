@@ -4,7 +4,7 @@ use serde::Deserialize;
 use std::collections::HashMap;
 use thiserror::Error;
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct Config {
     pub vars: HashMap<String, String>,
     pub hosts: HashMap<String, ConfigHost>,
@@ -12,30 +12,40 @@ pub struct Config {
     pub links: Vec<LinkDefinition>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 #[serde(untagged)]
 pub enum TaskDefinition {
     Ref(String),
     Literal(LiteralTaskDefinition),
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct LiteralTaskDefinition {
     pub name: Option<String>,
     pub exec: String,
     pub revert: Option<String>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
 pub struct ConfigHost {
     pub tasks: Vec<TaskDefinition>,
     pub links: Vec<LinkDefinition>,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Clone)]
+#[serde(rename_all = "lowercase")]
+pub enum LinkKind {
+    Hard,
+    Soft,
+    Copy,
+}
+
+#[derive(Deserialize, Debug, Clone)]
 pub struct LinkDefinition {
     pub from: String,
     pub to: String,
+    pub name: Option<String>,
+    pub kind: Option<LinkKind>,
 }
 
 #[derive(Deserialize, Error, Debug)]

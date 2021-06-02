@@ -1,11 +1,16 @@
+use anyhow::Result;
 use clap::Clap;
-use ellipsis::{config::Config, fs::read_config_file, opts::Opts};
+use ellipsis::{cmd::Runner, config::Config, fs::read_config_file, opts::Opts};
 use std::path::Path;
 
-fn main() {
+fn main() -> Result<()> {
     let opts = Opts::parse();
 
-    let config = read_config_file(opts.config.clone());
+    let config = read_config_file(opts.config.clone())?;
 
-    println!("opts {:?}", config);
+    // println!("opts {:?}", config);
+
+    Runner::new(config)?.execute_cmd(opts.subcommand)?;
+
+    Ok(())
 }

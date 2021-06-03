@@ -1,4 +1,6 @@
-use crate::config::{Config, ConfigHost, LinkDefinition, LiteralTaskDefinition, TaskDefinition};
+use crate::config::{
+    Config, ConfigHost, LinkDefinition, LinkKind, LiteralTaskDefinition, TaskDefinition,
+};
 use crate::opts::{ExecCmd, InstallCmd, LinkCmd, SubCommand};
 use anyhow::Result;
 use std::io::{self, Write};
@@ -15,6 +17,8 @@ pub enum ExecError {
     NoTaskFound(String),
     #[error("Task {0} failed with {1}")]
     RunFailure(String, String),
+    #[error("Could not retrieve metadata for file {0}")]
+    MetadataFailure(String),
 }
 
 pub struct Runner {
@@ -48,7 +52,27 @@ impl Runner {
     }
 
     fn execute_link_cmd(&self, cmd: LinkCmd) -> Result<()> {
-        todo!();
+        let host_config = self.get_config_host()?;
+        if cmd.args.is_empty() {
+            for link in host_config.links.clone() {
+                make_link(link)?;
+            }
+        } else {
+            let links: Vec<LinkDefinition> = host_config
+                .links
+                .iter()
+                .filter_map(|link| match link.name.clone() {
+                    Some(name) if cmd.args.contains(&name) => Some(link.clone()),
+                    Some(_) | None => None,
+                })
+                .collect();
+
+            for link in links {
+                make_link(link)?
+            }
+        }
+
+        Ok(())
     }
 
     fn execute_exec_cmd(&self, cmd: ExecCmd) -> Result<()> {
@@ -121,16 +145,42 @@ impl Runner {
 
 #[cfg(target_family = "unix")]
 fn make_link(link: LinkDefinition) -> Result<()> {
+    use std::fs::{copy, hard_link};
     use std::os::unix::fs::symlink;
 
-    let LinkDefinition { from, to, .. } = link;
-    symlink(from, to)?;
+    let LinkDefinition { from, to, kind, .. } = link;
+
+    match kind {
+        Some(LinkKind::Hard) => hard_link(from, to)?,
+        Some(LinkKind::Soft) | None => symlink(from, to)?,
+        Some(LinkKind::Copy) => copy(from, to).and(Ok(()))?,
+    };
+
     Ok(())
 }
 
 #[cfg(target_family = "windows")]
 fn make_link(link: LinkDefinition) -> Result<()> {
+    use std::fs::metadata;
+    use std::fs::{copy, hard_link};
     use std::os::windows::fs::{symlink_dir, symlink_file};
 
-    todo!();
+    let LinkDefinition { from, to, kind, .. } = link;
+
+    match kind {
+        Some(LinkKind::Hard) => hard_link(from, to)?,
+        Some(LinkKind::Soft) | None => match metadata(from) {
+            Some(data) => {
+                if data.is_dir() {
+                    symlink_dir(from, to)?
+                } else {
+                    symlink_file(from, to)?
+                }
+            }
+            None => return Err(ExecError::MetadataFailure(from).into()),
+        },
+        Some(LinkKind::Copy) => copy(from, to).and(Ok(()))?,
+    };
+
+    Ok(())
 }

@@ -56,7 +56,7 @@ impl Runner {
         let task = self.find_host_or_global_config_task(host_config, cmd.arg.clone());
 
         match task {
-            Some(t) => execute_task(t),
+            Some(t) => self.execute_task(t),
             None => Err(ExecError::NoTaskFound(cmd.arg).into()),
         }
     }
@@ -100,27 +100,23 @@ impl Runner {
                 None => None,
             })
     }
-}
 
-fn execute_task(task: LiteralTaskDefinition) -> Result<()> {
-    let output = if cfg!(target_os = "windows") {
-        Command::new("cmd")
-            .args(&["/C", task.exec.as_str()])
-            .output()?
-    } else {
-        Command::new("sh")
-            .arg("-c")
-            .arg(task.exec.as_str())
-            .output()?
-    };
+    fn execute_task(&self, task: LiteralTaskDefinition) -> Result<()> {
+        let exec = self.config.resolve_variable_string(task.exec)?;
+        let output = if cfg!(target_os = "windows") {
+            Command::new("cmd").args(&["/C", exec.as_str()]).output()?
+        } else {
+            Command::new("sh").arg("-c").arg(exec.as_str()).output()?
+        };
 
-    if !output.status.success() {
-        return Err(ExecError::RunFailure(task.exec, output.status.to_string()).into());
+        if !output.status.success() {
+            return Err(ExecError::RunFailure(exec, output.status.to_string()).into());
+        }
+
+        io::stdout().write_all(&output.stdout)?;
+        io::stderr().write_all(&output.stderr)?;
+        Ok(())
     }
-
-    io::stdout().write_all(&output.stdout)?;
-    io::stderr().write_all(&output.stderr)?;
-    Ok(())
 }
 
 #[cfg(target_family = "unix")]

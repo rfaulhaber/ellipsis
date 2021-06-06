@@ -22,7 +22,6 @@ pub enum TaskDefinition {
 pub struct LiteralTaskDefinition {
     pub name: Option<String>,
     pub exec: String,
-    pub revert: Option<String>,
 }
 
 #[derive(Deserialize, Debug, Clone)]

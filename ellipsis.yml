@@ -10,6 +10,16 @@ hosts:
     links:
       - from: "{{dotfile_root}}/config"
         to: ~/.config
+        kind: "hard"
+  mir3:
+    tasks:
+      - install_hammerspoon
+      - name: install_homebrew
+        exec: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    links:
+      - from: "{{dotfile_root}}/config"
+        to: ~/.config
+        kind: "hard"
 
 # these are global tasks that are only here to be referenced in the tasks heading
 tasks:

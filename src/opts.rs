@@ -8,10 +8,6 @@ pub struct Opts {
     #[clap(long)]
     pub config: Option<String>,
 
-    /// Overrides hostname check, manually specifying the hostname to run.
-    #[clap(long)]
-    pub hostname: Option<String>,
-
     #[clap(subcommand)]
     pub subcommand: SubCommand,
 }
@@ -26,13 +22,8 @@ pub enum SubCommand {
 /// Makes some or all links for a host.
 #[derive(Clap, Debug)]
 pub struct LinkCmd {
-    /// Hard links files rather than soft link. Exclusive with -c
-    #[clap(short, long)]
-    pub hard: Option<bool>,
-
-    /// Copies files rather than links. Exclusive with -h
-    #[clap(short, long)]
-    pub copy: Option<bool>,
+    /// Host to execute.
+    pub hostname: String,
 
     /// Links to run. Makes all links if not specified.
     pub args: Vec<String>,
@@ -40,11 +31,17 @@ pub struct LinkCmd {
 
 /// Runs all tasks for a host.
 #[derive(Clap, Debug)]
-pub struct InstallCmd {}
+pub struct InstallCmd {
+    /// Host to execute.
+    pub hostname: String,
+}
 
 /// Executes a particular task for a host.
 #[derive(Clap, Debug)]
 pub struct ExecCmd {
+    /// Host to execute.
+    pub hostname: String,
+
     /// Task to execute.
-    pub arg: String,
+    pub task_name: String,
 }

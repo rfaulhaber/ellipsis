@@ -1,0 +1,30 @@
+vars:
+  message: "hello!"
+  test_dir: "./foo"
+hosts:
+  install_test:
+    tasks:
+      - test_task_ref
+      - name: "Say hello"
+        exec: echo "{{message}} world!"
+      - name: "Make fake link file"
+        exec: touch ./test.txt
+      - name: "Make fake link directory"
+        exec: mkdir {{test_dir}}
+    links:
+      - from: /app/test.txt
+        to: "{{test_dir}}/test.txt"
+  link_test:
+    tasks: []
+    links:
+      - from: /app/test.txt
+        to: "{{test_dir}}/test.txt"
+  exec_test:
+    tasks:
+      - name: cmd
+        exec: echo "hello world"
+    links: []
+
+tasks:
+  test_task_ref:
+    exec: echo "this is the referenced task!"
